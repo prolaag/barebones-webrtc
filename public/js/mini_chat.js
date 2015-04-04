@@ -24,7 +24,7 @@ function messages() {
           }, error);
         }, error);
         log('Received an offer: ' + offer.sdp);
-        sendChannel = pc.createDataChannel('sendDataChannel', {reliable: true});
+        send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
         break;
       case 'answer':
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {}, error);
@@ -40,18 +40,15 @@ var interval = setInterval(messages, 5000);
 //
 
 // main peer connection object - need one per peer
-var pc;
-// send and receive get their own channels each (act independently)
-var sendChannel, receiveChannel;
-
 // pc will always been in the global scope
-// RTCPeerConnection is abstracted in adapter.js for cross-browser support
-window.pc = pc = new RTCPeerConnection(null, null);
+// Note: RTCPeerConnection is abstracted in adapter.js for cross-browser support
+var pc = window.pc = new RTCPeerConnection(null, null);
+var send_channel;
+
 // if our peer sets up a data channel, set our receive channel to that channel
 pc.ondatachannel = function(data_channel_event) {
-  receiveChannel = data_channel_event.channel;
   // this function is invoked whenever a message from our peer arrives
-  receiveChannel.onmessage = function(data_channel_event) {
+  data_channel_event.channel.onmessage = function(data_channel_event) {
     document.querySelector('textarea#dataChannelReceive').value = data_channel_event.data;
   }
   // logged to the console to let us know when this happens
@@ -69,12 +66,12 @@ pc.onicecandidate = function(ice_event) {
 
 // call this to kick off the session negotiation process with a remote peer
 document.querySelector('button#startButton').onclick = function() {
-  sendChannel = pc.createDataChannel('sendDataChannel', {reliable: true});
+  send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
   pc.createOffer(function(offer) {
     pc.setLocalDescription(new RTCSessionDescription(offer), function() {}, error);
   }, error);
 };
 // call this to send the textbox content through our send channel
 document.querySelector('button#sendButton').onclick = function() {
-  sendChannel.send(document.querySelector('textarea#dataChannelSend').value)
+  send_channel.send(document.querySelector('textarea#dataChannelSend').value)
 };

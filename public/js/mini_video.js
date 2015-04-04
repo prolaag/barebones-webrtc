@@ -19,7 +19,7 @@ function messages() {
       case 'offer':
         offer_type = 'answer';
 
-        getUserMedia({video: true}, function(stream) {
+        getUserMedia({video: true, audio: true}, function(stream) {
           local_stream = stream;
           log("Received local stream");
           // show our own video locally
@@ -47,20 +47,19 @@ var interval = setInterval(messages, 5000);
 // meat of webRTC functionality
 //
 
-var local_stream, receive_stream;
+// main peer connection object - need one per peer
+// pc will always be in the global scope
+// Note: RTCPeerConnection is abstracted in adapter.js for cross-browser support
 var pc = window.pc = new RTCPeerConnection(null, null);
+var local_stream;
 
 pc.onaddstream = function(add_stream_event) {
-  receive_stream = add_stream_event.stream;
-  document.getElementById("remoteVideo").src = URL.createObjectURL(receive_stream);
   log('Received a video stream from remote peer');
+  document.getElementById("remoteVideo").src = URL.createObjectURL(add_stream_event.stream);
 }
 
 pc.onicecandidate = function(ice_event) {
-  if (ice_event.candidate) {
-    log("Local ICE candidate: \n" + ice_event.candidate.candidate);
-  }
-  else {
+  if (!ice_event.candidate) {
     log('Description sent to peer: ' + JSON.stringify(pc.localDescription));
     send({type: offer_type, sdp: pc.localDescription.sdp});
   }
@@ -69,8 +68,7 @@ pc.onicecandidate = function(ice_event) {
 // call this to kick off the session negotiation process with a remote peer
 document.getElementById("startButton").onclick = function() {
   log("Requesting local stream");
-  // can also request 'audio' here
-  getUserMedia({video: true}, function(stream) {
+  getUserMedia({video: true, audio: true}, function(stream) {
       local_stream = stream;
       log("Received local stream");
 
