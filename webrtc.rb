@@ -1,10 +1,7 @@
 require 'sinatra'
 require 'json'
-require 'pp'
 
 class WebRTCWebsite < Sinatra::Base
-  use Rack::Session::Pool, :expire_after => 2592000
-
   before do
     # hash of arrays; key is channel, array contains queued messages
     @@signals ||= Hash.new{ |hash, key| hash[key] = [] }
@@ -18,6 +15,7 @@ class WebRTCWebsite < Sinatra::Base
     @@signals[channel].size.to_s
   end
 
+  # read messages from the given channel NOT sent by self
   get '/read/:channel' do |channel|
     message = nil
 
