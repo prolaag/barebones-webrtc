@@ -12,9 +12,9 @@ function error(err) { log('Encountered an error: ' + err.name); pc.close(); }
 // change to 'answer' if not the initiator
 var offer_type = 'offer';
 var channel = prompt('Please choose a room name', 'default')
-function send(data) {$.post("/send/" + channel, {msg: data} );}
+function send(data) {post_ajax("/send/" + channel, {msg: data} );}
 function messages() {
-  $.getJSON("/read/" + channel, function(offer) {
+  getJSON("/read/" + channel, function(offer) {
     switch(offer.type) {
       case 'offer':
         offer_type = 'answer';
@@ -31,7 +31,7 @@ function messages() {
         break;
       default: break;
     }
-  }, "json" );
+  });
 }
 var interval = setInterval(messages, 5000);
 

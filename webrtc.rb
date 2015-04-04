@@ -12,7 +12,8 @@ class WebRTCWebsite < Sinatra::Base
 
   # clients post to here for signaling
   post '/send/:channel' do |channel|
-    @@signals[channel] << {msg: params[:msg], source: request.ip} if params[:msg]
+    payload = JSON.parse(request.body.read)
+    @@signals[channel] << {msg: payload['msg'], source: request.ip} if payload['msg']
 
     @@signals[channel].size.to_s
   end
