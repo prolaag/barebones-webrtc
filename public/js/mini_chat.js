@@ -48,11 +48,11 @@ var sendChannel, receiveChannel;
 // RTCPeerConnection is abstracted in adapter.js for cross-browser support
 window.pc = pc = new RTCPeerConnection(null, null);
 // if our peer sets up a data channel, set our receive channel to that channel
-pc.ondatachannel = function(event) {
-  receiveChannel = event.channel;
+pc.ondatachannel = function(data_channel_event) {
+  receiveChannel = data_channel_event.channel;
   // this function is invoked whenever a message from our peer arrives
-  receiveChannel.onmessage = function(event) {
-    document.querySelector('textarea#dataChannelReceive').value = event.data;
+  receiveChannel.onmessage = function(data_channel_event) {
+    document.querySelector('textarea#dataChannelReceive').value = data_channel_event.data;
   }
   // logged to the console to let us know when this happens
   log('Created a receive data channel - may now receive data from peer.');

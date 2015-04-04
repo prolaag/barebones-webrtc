@@ -30,6 +30,10 @@ class WebRTCWebsite < Sinatra::Base
     (message || {}).to_json
   end
 
+  get '/mini_video' do
+    erb :mini_video
+  end
+
   get '/mini_chat' do
     erb :mini_chat
   end
