@@ -1,9 +1,7 @@
+// Copyright (c) 2014, The WebRTC project authors. All rights reserved.
 //
-// Found in numerous places, including:
-// https://bitbucket.org/webrtc/codelab
-//
-// Not sure if/how it was originally licensed
-//
+// Original source:
+// https://github.com/webrtc/adapter
 
 var RTCPeerConnection = getUserMedia = null;
 var attachMediaStream = reattachMediaStream = null;
