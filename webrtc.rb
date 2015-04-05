@@ -37,4 +37,8 @@ class WebRTCWebsite < Sinatra::Base
   get '/mini_chat' do
     erb :mini_chat
   end
+
+  get '/file_transfer' do
+    erb :file_transfer
+  end
 end
