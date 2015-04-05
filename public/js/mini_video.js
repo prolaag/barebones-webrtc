@@ -56,6 +56,8 @@ var local_stream;
 pc.onaddstream = function(add_stream_event) {
   log('Received a video stream from remote peer');
   document.getElementById("remoteVideo").src = URL.createObjectURL(add_stream_event.stream);
+  // stop polling for signal messages
+  clearInterval(interval);
 }
 
 pc.onicecandidate = function(ice_event) {
@@ -86,5 +88,6 @@ document.getElementById("startButton").onclick = function() {
 document.getElementById("hangupButton").onclick = function() {
   log("Ending call");
   pc.close();
-  pc = null;
+  pc = window.pc = new RTCPeerConnection(null, null);
+  interval = setInterval(messages, 5000);
 };

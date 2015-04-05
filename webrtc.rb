@@ -41,4 +41,8 @@ class WebRTCWebsite < Sinatra::Base
   get '/file_transfer' do
     erb :file_transfer
   end
+
+  get '/*' do
+    erb :index
+  end
 end

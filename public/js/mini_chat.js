@@ -53,6 +53,7 @@ pc.ondatachannel = function(data_channel_event) {
   }
   // logged to the console to let us know when this happens
   log('Created a receive data channel - may now receive data from peer.');
+  clearInterval(interval);
 }
 
 // add a callback for when ice candidates are created by the peer connection

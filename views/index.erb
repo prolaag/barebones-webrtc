@@ -1,0 +1,32 @@
+<h1>Directory of Samples</h1>
+
+<ul>
+  <li>
+    <strong><a href="./mini_chat">Mini Chat</a></strong>
+    - Demonstrates very basic 'chat' functionality using WebRTC data channels.
+    Displays the last message received from your peer.
+  </li>
+
+  <li>
+    <strong><a href="./mini_video">Mini Video</a></strong>
+    - Demonstrates very basic video and audio functionality using WebRTC media
+    channels.
+  </li>
+
+  <li>
+    <strong><a href="./file_transfer">File Transfer</a></strong>
+    - Demonstrates very basic file transfer functionality using WebRTC data
+    channels. Displays received files as download links.
+  </li>
+
+</ul>
+
+<p>
+  <strong>Note:</strong> in all cases, peers must be on different IP addresses
+  for signaling to work. This is only because the signaling backend uses IP
+  addresses to ensure that signals are NOT sent to the clients from which they
+  originated. This could be easily circumvented by using some other identifier
+  (like a session cookie or a client-supplied username). If you are testing
+  locally, you could access one host via 'http://127.0.0.1:[port]' and the
+  other via 'http://[internal network ip]:[port]' (eg: http://10.1.1.2:7890).
+</p>
