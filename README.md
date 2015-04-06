@@ -1,4 +1,4 @@
-# WebRTC using Sinatra without WebSockets
+# Tiny WebRTC Examples - without node.js or WebSockets
 This project contains WebRTC examples that use Sinatra and AJAX for signaling.
 It was created to demonstrate minimalistic data channel and media stream setup,
 and to demonstrate minimalistic signal exchange between two clients.
