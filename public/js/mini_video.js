@@ -17,6 +17,8 @@ function messages() {
   getJSON("/read/" + channel, function(offer) {
     switch(offer.type) {
       case 'offer':
+        document.getElementById("startButton").disabled = true;
+        log('Received a remote offer');
         offer_type = 'answer';
 
         getUserMedia({video: true, audio: true}, function(stream) {
@@ -35,6 +37,7 @@ function messages() {
         }, error);
         break;
       case 'answer':
+        log('Received a remote answer');
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {}, error);
         break;
       default: break;
@@ -55,6 +58,7 @@ var local_stream;
 
 pc.onaddstream = function(add_stream_event) {
   log('Received a video stream from remote peer');
+  document.getElementById("hangupButton").disabled = false;
   document.getElementById("remoteVideo").src = URL.createObjectURL(add_stream_event.stream);
   // stop polling for signal messages
   clearInterval(interval);
@@ -69,6 +73,7 @@ pc.onicecandidate = function(ice_event) {
 
 // call this to kick off the session negotiation process with a remote peer
 document.getElementById("startButton").onclick = function() {
+  document.getElementById("startButton").disabled = true;
   log("Requesting local stream");
   getUserMedia({video: true, audio: true}, function(stream) {
       local_stream = stream;
@@ -89,5 +94,9 @@ document.getElementById("hangupButton").onclick = function() {
   log("Ending call");
   pc.close();
   pc = window.pc = new RTCPeerConnection(null, null);
+  document.getElementById("hangupButton").disabled = true;
+  document.getElementById("localVideo").src = null;
+  document.getElementById("remoteVideo").src = null;
+  offer_type = "offer";
   interval = setInterval(messages, 5000);
 };

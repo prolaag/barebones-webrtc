@@ -17,6 +17,7 @@ function messages() {
   getJSON("/read/" + channel, function(offer) {
     switch(offer.type) {
       case 'offer':
+        document.querySelector('button#startButton').disabled = true;
         offer_type = 'answer';
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
           pc.createAnswer(function(answer) {
@@ -46,6 +47,9 @@ var pc = window.pc = new RTCPeerConnection(null, null);
 var send_channel, outgoing_file, incoming_file = {};
 var start_token = 0, data_token = 1, end_token = 2;
 
+var rx_progress = document.querySelector('progress#rx_progress');
+var tx_progress = document.querySelector('progress#tx_progress');
+
 // if our peer sets up a data channel, set our receive channel to that channel
 pc.ondatachannel = function(data_channel_event) {
   // this function is invoked whenever a message from our peer arrives
@@ -64,10 +68,12 @@ pc.ondatachannel = function(data_channel_event) {
         incoming_file.received_size = 0;
         incoming_file.content = [];
         log('New incoming file: ' + JSON.stringify(incoming_file));
+        rx_progress.max = incoming_file.size;
         break;
       case data_token:
         incoming_file.content.push(raw_data);
         incoming_file.received_size += raw_data.byteLength;
+        rx_progress.value = incoming_file.received_size;
 
         // if we've received everything from our peer
         if(incoming_file.received_size == incoming_file.size) {
@@ -89,6 +95,7 @@ pc.ondatachannel = function(data_channel_event) {
         break;
     }
   }
+  document.querySelector('input[type=file]').disabled = false;
   // logged to the console to let us know when this happens
   log('Created a receive data channel - may now receive data from peer.');
   clearInterval(interval);
@@ -104,6 +111,7 @@ pc.onicecandidate = function(ice_event) {
 
 // call this to kick off the session negotiation process with a remote peer
 document.querySelector('button#startButton').onclick = function() {
+  document.querySelector('button#startButton').disabled = true;
   send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
   pc.createOffer(function(offer) {
     pc.setLocalDescription(new RTCSessionDescription(offer), function() {}, error);
@@ -126,9 +134,13 @@ document.querySelector('input[type=file]').onchange = function() {
         // read the file into an array
         data.set(new Uint8Array(e.target.result), 2);
         send_channel.send(data.buffer);
+        tx_progress.value = offset;
         // if there is more file to send, send it
         if (outgoing_file.size > offset + e.target.result.byteLength) {
-          window.setTimeout(slice_file, 1, offset + chunk_length);
+          window.setTimeout(slice_file, 5, offset + chunk_length);
+        }
+        else {
+          tx_progress.value = outgoing_file.size;
         }
       };
     })(outgoing_file);
@@ -144,6 +156,7 @@ document.querySelector('input[type=file]').onchange = function() {
   var data = new Uint16Array(1 + file_desc.length);
   for(var i = 1; i <= file_desc.length; i++) { data.set([file_desc.charCodeAt(i - 1)], i) }
   data.set([start_token], 0);
+  tx_progress.max = outgoing_file.size;
   // send the description of the incoming file to the recipient
   send_channel.send(data.buffer);
   // start the file transfer
