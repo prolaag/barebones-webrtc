@@ -17,6 +17,7 @@ function messages() {
   getJSON("/read/" + channel, function(offer) {
     switch(offer.type) {
       case 'offer':
+        document.querySelector('button#startButton').disabled = true;
         offer_type = 'answer';
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
           pc.createAnswer(function(answer) {
@@ -51,6 +52,7 @@ pc.ondatachannel = function(data_channel_event) {
   data_channel_event.channel.onmessage = function(data_channel_event) {
     document.querySelector('textarea#dataChannelReceive').value = data_channel_event.data;
   }
+  document.querySelector('button#sendButton').disabled = false;
   // logged to the console to let us know when this happens
   log('Created a receive data channel - may now receive data from peer.');
   clearInterval(interval);
@@ -67,6 +69,7 @@ pc.onicecandidate = function(ice_event) {
 
 // call this to kick off the session negotiation process with a remote peer
 document.querySelector('button#startButton').onclick = function() {
+  document.querySelector('button#startButton').disabled = true;
   send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
   pc.createOffer(function(offer) {
     pc.setLocalDescription(new RTCSessionDescription(offer), function() {}, error);
