@@ -42,6 +42,10 @@ class WebRTCWebsite < Sinatra::Base
     erb :file_transfer
   end
 
+  get '/mini_sdp' do
+    erb :mini_sdp
+  end
+
   get '/*' do
     erb :index
   end
