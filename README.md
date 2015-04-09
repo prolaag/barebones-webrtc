@@ -15,7 +15,7 @@ Sinatra (`gem install sinatra`)
 # Usage
 
 ```
-rackup
+ruby webrtc.rb
 ```
 
 # How it Works
