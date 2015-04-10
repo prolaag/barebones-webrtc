@@ -52,15 +52,16 @@ var send_channel;
 function sdp_info(sdp) {
   var sdp_info = {};
 
+  log('Extracting information from sdp: ' + sdp);
+
   // Notes per https://tools.ietf.org/html/rfc5245
   // ice-ufrag and ice-pwd contain up to 256 'ice-char's [a-zA-z0-9/\+]
   // ice-ufrag will contain at least 4 'ice-char's
   // ice-pwd will contain at least 22 'ice-char's
   // each 'ice-char' contains 6 bits of data, so 192 bytes worst-case
-  // would be needed to store those fields, plus an additional 5 bits for
-  // the length of the ice-ufrag field (though possible ranges are limited
-  // to 29 values: [4-32], and 4 bits to store the ice-pwd field length
-  // (since possible ranges are limited to 11 values: [22-32]
+  // would be needed to store those fields, plus an additional byte each
+  // for the length of the ice-ufrag and ice-pwd field lengths
+  // (since possible ranges range from 4 to 256)
   sdp_info.ice_ufrag =    sdp.match(/^a=ice-ufrag:(.*)$/m)[1];
   sdp_info.ice_pwd =      sdp.match(/^a=ice-pwd:(.*)$/m)[1];
   // the fingerprint contains ASCII hex bytes separated by ':'
