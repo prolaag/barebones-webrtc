@@ -10,7 +10,7 @@ function error(err) { log('Encountered an error: ' + err.name); pc.close(); }
 //
 
 // change to 'answer' if not the initiator
-var offer_type = 'offer';
+var offerType = 'offer';
 var channel = prompt('Please choose a room name', 'default')
 function send(data) {post_ajax("/send/" + channel, {msg: data} );}
 function messages() {
@@ -18,14 +18,13 @@ function messages() {
     switch(offer.type) {
       case 'offer':
         document.querySelector('button#startButton').disabled = true;
-        offer_type = 'answer';
+        offerType = 'answer';
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
           pc.createAnswer(function(answer) {
             pc.setLocalDescription(new RTCSessionDescription(answer), function() {}, error);
           }, error);
         }, error);
         log('Received an offer: ' + offer.sdp);
-        send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
         break;
       case 'answer':
         pc.setRemoteDescription(new RTCSessionDescription(offer), function() {}, error);
@@ -34,7 +33,7 @@ function messages() {
     }
   });
 }
-var interval = setInterval(messages, 5000);
+var interval = setInterval(messages, 1000);
 
 //
 // meat of webRTC functionality
@@ -44,38 +43,42 @@ var interval = setInterval(messages, 5000);
 // pc will always been in the global scope
 // Note: RTCPeerConnection is abstracted in adapter.js for cross-browser support
 var pc = window.pc = new RTCPeerConnection(null, null);
-var send_channel;
+var sendChannel;
 
-// if our peer sets up a data channel, set our receive channel to that channel
-pc.ondatachannel = function(data_channel_event) {
-  // this function is invoked whenever a message from our peer arrives
-  data_channel_event.channel.onmessage = function(data_channel_event) {
-    document.querySelector('textarea#dataChannelReceive').value = data_channel_event.data;
-  }
+function rxMessage(ev) {document.querySelector('textarea#dataChannelReceive').value = ev.data;}
+
+function enableSend(evt) {
+  sendChannel = (evt.channel || evt.target);
   document.querySelector('button#sendButton').disabled = false;
   // logged to the console to let us know when this happens
   log('Created a receive data channel - may now receive data from peer.');
+  sendChannel.onmessage = rxMessage;
+  // stop polling for signaling messages
   clearInterval(interval);
 }
 
+// if our peer sets up a data channel, set our receive channel to that channel
+pc.ondatachannel = enableSend;
+
 // add a callback for when ice candidates are created by the peer connection
-pc.onicecandidate = function(ice_event) {
+pc.onicecandidate = function(iceEvent) {
   log('Received new ice candidate');
-  if (!ice_event.candidate) {
+  if (!iceEvent.candidate) {
     log('Description sent to peer: ' + JSON.stringify(pc.localDescription));
-    send({type: offer_type, sdp: pc.localDescription.sdp});
+    send({type: offerType, sdp: pc.localDescription.sdp});
   }
 };
 
 // call this to kick off the session negotiation process with a remote peer
 document.querySelector('button#startButton').onclick = function() {
   document.querySelector('button#startButton').disabled = true;
-  send_channel = pc.createDataChannel('sendDataChannel', {reliable: true});
+  sendChannel = pc.createDataChannel('sendDataChannel', {reliable: true});
+  sendChannel.onopen = enableSend;
   pc.createOffer(function(offer) {
     pc.setLocalDescription(new RTCSessionDescription(offer), function() {}, error);
   }, error);
 };
 // call this to send the textbox content through our send channel
 document.querySelector('button#sendButton').onclick = function() {
-  send_channel.send(document.querySelector('textarea#dataChannelSend').value)
+  sendChannel.send(document.querySelector('textarea#dataChannelSend').value)
 };
